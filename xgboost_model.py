@@ -221,101 +221,101 @@ model = xgb.XGBClassifier(
 )
 
 
-# model.fit(
-#     X_train, y_train,
-#     eval_set=[(X_train, y_train), (X_val, y_val)],
-#     verbose=False
+model.fit(
+    X_train, y_train,
+    eval_set=[(X_train, y_train), (X_val, y_val)],
+    verbose=False
+)
+
+results = model.evals_result()
+# Plot the learning curve
+# Updated Plotting Code
+plt.figure(figsize=(10, 7))
+
+# Use 'validation_0' for the first dataset in eval_set (X_train)
+plt.plot(results['validation_0']['logloss'], label='Training loss')
+
+# Use 'validation_1' for the second dataset in eval_set (X_val)
+plt.plot(results['validation_1']['logloss'], label='Validation loss')
+
+plt.xlabel('Number of trees (Epochs)')
+plt.ylabel('Log Loss')
+plt.title('XGBoost Training and Validation Curve')
+plt.legend()
+plt.show()
+
+
+
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    confusion_matrix
+)
+
+# # Probabilities & predictions
+# val_probs = model.predict_proba(X_val)[:, 1]
+# thresholds = np.linspace(0.45, 0.65, 41)
+#
+# best = []
+# for t in thresholds:
+#     preds = (val_probs > t).astype(int)
+#     acc = accuracy_score(y_val, preds)
+#     prec = precision_score(y_val, preds)
+#     rec = recall_score(y_val, preds)
+#     f1 = f1_score(y_val, preds)
+#     best.append((t, acc, prec, rec, f1))
+#
+# best_df = pd.DataFrame(
+#     best, columns=['threshold', 'accuracy', 'precision', 'recall', 'f1']
 # )
 #
-# results = model.evals_result()
-# # Plot the learning curve
-# # Updated Plotting Code
-# plt.figure(figsize=(10, 7))
-#
-# # Use 'validation_0' for the first dataset in eval_set (X_train)
-# plt.plot(results['validation_0']['logloss'], label='Training loss')
-#
-# # Use 'validation_1' for the second dataset in eval_set (X_val)
-# plt.plot(results['validation_1']['logloss'], label='Validation loss')
-#
-# plt.xlabel('Number of trees (Epochs)')
-# plt.ylabel('Log Loss')
-# plt.title('XGBoost Training and Validation Curve')
-# plt.legend()
-# plt.show()
-#
-#
-#
-# from sklearn.metrics import (
-#     accuracy_score,
-#     precision_score,
-#     recall_score,
-#     f1_score,
-#     roc_auc_score,
-#     confusion_matrix
-# )
-#
-# # # Probabilities & predictions
-# # val_probs = model.predict_proba(X_val)[:, 1]
-# # thresholds = np.linspace(0.45, 0.65, 41)
-# #
-# # best = []
-# # for t in thresholds:
-# #     preds = (val_probs > t).astype(int)
-# #     acc = accuracy_score(y_val, preds)
-# #     prec = precision_score(y_val, preds)
-# #     rec = recall_score(y_val, preds)
-# #     f1 = f1_score(y_val, preds)
-# #     best.append((t, acc, prec, rec, f1))
-# #
-# # best_df = pd.DataFrame(
-# #     best, columns=['threshold', 'accuracy', 'precision', 'recall', 'f1']
-# # )
-# #
-# # print(best_df.sort_values('f1', ascending=False).head(10))
-#
-# model.save_model("xgb_pct_change_model_no_news.json")
-# print("\n✓ Model saved!")
-#
-# # 14. Test set evaluation
-# print("\n" + "=" * 80)
-# print("TEST SET EVALUATION")
-# print("=" * 80)
-#
-# back_X = test_df
-# X_test = test_df.drop(columns=['datetime', 'pct_change', 'up_down','weighted_avg_sentiment'])
-# y_test = test_df['up_down']
-#
-# # Clean test data
-# test_clean = ~(y_test.isna() |
-#                X_test.isna().any(axis=1) |
-#                np.isinf(X_test.select_dtypes(include=[np.number])).any(axis=1))
-#
-# X_test = X_test[test_clean]
-# y_test = y_test[test_clean]
-#
-# print(f"Test samples: {len(X_test):,}")
-#
-# train_probs = model.predict_proba(X_train)[:,1]
-# t = np.quantile(train_probs, 0.9)
-#
-# # Predictions
-# test_probs = model.predict_proba(X_test)[:, 1]
-# test_preds = (test_probs >= t).astype(int)
-# print("The threshold is:", t)
-#
-# print("Final sample lemgth", len(test_preds))
-#
-# print("\n" + "=" * 80)
-# print("TEST SET RESULTS (DIRECTION PREDICTION)")
-# print("=" * 80)
-#
-# print(f"Accuracy:  {accuracy_score(y_test, test_preds):.4f}")
-# print(f"Precision: {precision_score(y_test, test_preds):.4f}")
-# print(f"Recall:    {recall_score(y_test, test_preds):.4f}")
-# print(f"F1-score:  {f1_score(y_test, test_preds):.4f}")
-# print(f"ROC-AUC:   {roc_auc_score(y_test, test_probs):.4f}")
-#
-# print("\nConfusion Matrix:")
-# print(confusion_matrix(y_test, test_preds))
-# print("=" * 80)
+# print(best_df.sort_values('f1', ascending=False).head(10))
+
+model.save_model("xgb_pct_change_model_no_news.json")
+print("\n✓ Model saved!")
+
+# 14. Test set evaluation
+print("\n" + "=" * 80)
+print("TEST SET EVALUATION")
+print("=" * 80)
+
+back_X = test_df
+X_test = test_df.drop(columns=['datetime', 'pct_change', 'up_down','weighted_avg_sentiment'])
+y_test = test_df['up_down']
+
+# Clean test data
+test_clean = ~(y_test.isna() |
+               X_test.isna().any(axis=1) |
+               np.isinf(X_test.select_dtypes(include=[np.number])).any(axis=1))
+
+X_test = X_test[test_clean]
+y_test = y_test[test_clean]
+
+print(f"Test samples: {len(X_test):,}")
+
+train_probs = model.predict_proba(X_train)[:,1]
+t = np.quantile(train_probs, 0.9)
+
+# Predictions
+test_probs = model.predict_proba(X_test)[:, 1]
+test_preds = (test_probs >= t).astype(int)
+print("The threshold is:", t)
+
+print("Final sample lemgth", len(test_preds))
+
+print("\n" + "=" * 80)
+print("TEST SET RESULTS (DIRECTION PREDICTION)")
+print("=" * 80)
+
+print(f"Accuracy:  {accuracy_score(y_test, test_preds):.4f}")
+print(f"Precision: {precision_score(y_test, test_preds):.4f}")
+print(f"Recall:    {recall_score(y_test, test_preds):.4f}")
+print(f"F1-score:  {f1_score(y_test, test_preds):.4f}")
+print(f"ROC-AUC:   {roc_auc_score(y_test, test_probs):.4f}")
+
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, test_preds))
+print("=" * 80)
